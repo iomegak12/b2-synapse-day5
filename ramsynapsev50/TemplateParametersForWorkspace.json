@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "ramsynapsev50"
+		},
+		"ramsynapsev50-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"TrainingDLSGen2_properties_typeProperties_url": {
+			"value": "https://ramperfdlsv10.dfs.core.windows.net/"
+		},
+		"ramsynapsev50-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://ramdlsv50.dfs.core.windows.net"
+		}
+	}
+}

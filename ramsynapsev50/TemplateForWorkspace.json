@@ -1,0 +1,1752 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "ramsynapsev50"
+		},
+		"ramsynapsev50-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ramsynapsev50-WorkspaceDefaultSqlServer'"
+		},
+		"TrainingDLSGen2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ramperfdlsv10.dfs.core.windows.net/"
+		},
+		"ramsynapsev50-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ramdlsv50.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/TrainingDLSGen2')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('TrainingDLSGen2_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ramsynapsev50-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('ramsynapsev50-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ramsynapsev50-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ramsynapsev50-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Delta Lake Optimization - 1')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "e91aff85-9529-4013-90f7-474b12c892a0"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1",
+						"state": {
+							"14e69524-aea2-48c8-a096-7b91af95e8ff": {
+								"type": "Synapse.DataFrame",
+								"sync_state": {
+									"table": {
+										"rows": [
+											{
+												"0": "6",
+												"1": "ATL",
+												"2": "6046"
+											},
+											{
+												"0": "3",
+												"1": "ATL",
+												"2": "6019"
+											},
+											{
+												"0": "9",
+												"1": "ATL",
+												"2": "5722"
+											},
+											{
+												"0": "6",
+												"1": "ORD",
+												"2": "5241"
+											},
+											{
+												"0": "3",
+												"1": "ORD",
+												"2": "5072"
+											},
+											{
+												"0": "9",
+												"1": "ORD",
+												"2": "4931"
+											},
+											{
+												"0": "7",
+												"1": "ATL",
+												"2": "4894"
+											},
+											{
+												"0": "8",
+												"1": "ATL",
+												"2": "4821"
+											},
+											{
+												"0": "4",
+												"1": "ATL",
+												"2": "4798"
+											},
+											{
+												"0": "5",
+												"1": "ATL",
+												"2": "4656"
+											},
+											{
+												"0": "2",
+												"1": "ATL",
+												"2": "4601"
+											},
+											{
+												"0": "1",
+												"1": "ATL",
+												"2": "4540"
+											},
+											{
+												"0": "7",
+												"1": "ORD",
+												"2": "4249"
+											},
+											{
+												"0": "8",
+												"1": "ORD",
+												"2": "4171"
+											},
+											{
+												"0": "4",
+												"1": "ORD",
+												"2": "4140"
+											},
+											{
+												"0": "5",
+												"1": "ORD",
+												"2": "4134"
+											},
+											{
+												"0": "6",
+												"1": "DFW",
+												"2": "4129"
+											},
+											{
+												"0": "2",
+												"1": "ORD",
+												"2": "3999"
+											},
+											{
+												"0": "1",
+												"1": "ORD",
+												"2": "3992"
+											},
+											{
+												"0": "9",
+												"1": "DFW",
+												"2": "3953"
+											}
+										],
+										"schema": [
+											{
+												"key": "0",
+												"name": "Month",
+												"type": "int"
+											},
+											{
+												"key": "1",
+												"name": "Origin",
+												"type": "string"
+											},
+											{
+												"key": "2",
+												"name": "TotalFlights",
+												"type": "bigint"
+											}
+										],
+										"truncated": false
+									},
+									"isSummary": false,
+									"language": "scala"
+								},
+								"persist_state": {
+									"view": {
+										"type": "details",
+										"chartOptions": {
+											"chartType": "bar",
+											"aggregationType": "sum",
+											"categoryFieldKeys": [
+												"1"
+											],
+											"seriesFieldKeys": [
+												"0"
+											],
+											"isStacked": false
+										}
+									}
+								}
+							}
+						}
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"dataPath = \"/data.csv\"\r\n",
+							"\r\n",
+							"flights = spark \\\r\n",
+							"    .read \\\r\n",
+							"    .format(\"csv\") \\\r\n",
+							"    .option(\"header\", \"true\") \\\r\n",
+							"    .option(\"inferSchema\", \"true\") \\\r\n",
+							"    .load(dataPath)\r\n",
+							"\r\n",
+							"flights.show(10)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 15
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"partitionedDlsPath = \"/partitioned-flights\"\r\n",
+							"\r\n",
+							"flights \\\r\n",
+							"    .write \\\r\n",
+							"    .format(\"parquet\") \\\r\n",
+							"    .mode(\"overwrite\") \\\r\n",
+							"    .partitionBy(\"Origin\") \\\r\n",
+							"    .save(partitionedDlsPath)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 16
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.functions import *\r\n",
+							"\r\n",
+							"flights_parquet = spark \\\r\n",
+							"    .read \\\r\n",
+							"    .format(\"parquet\") \\\r\n",
+							"    .load(partitionedDlsPath)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 17
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"filtered_flights = flights_parquet \\\r\n",
+							"    .filter(\"DayOfWeek = 1\") \\\r\n",
+							"    .groupBy(\"Month\", \"Origin\") \\\r\n",
+							"    .agg (\r\n",
+							"        count(\"*\").alias(\"TotalFlights\")) \\\r\n",
+							"    .orderBy(\"TotalFlights\", ascending = False) \\\r\n",
+							"    .limit(20)\r\n",
+							"\r\n",
+							"display(filtered_flights)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 18
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"deltaDlsPath = \"/delta-partitioned-flights\"\r\n",
+							"\r\n",
+							"flights \\\r\n",
+							"    .write \\\r\n",
+							"    .format(\"delta\") \\\r\n",
+							"    .mode(\"overwrite\") \\\r\n",
+							"    .partitionBy(\"Origin\") \\\r\n",
+							"    .save(deltaDlsPath)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 19
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"DROP TABLE IF EXISTS flights;\r\n",
+							"\r\n",
+							"CREATE TABLE flights\r\n",
+							"USING DELTA\r\n",
+							"LOCATION \"/delta-partitioned-flights\""
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 20
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"SELECT COUNT(*) AS TotalFlights\r\n",
+							"FROM flights\r\n",
+							"WHERE DayOfWeek = 1\r\n",
+							"GROUP BY Month, Origin\r\n",
+							"ORDER BY TotalFlights DESC\r\n",
+							"LIMIT 20"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 21
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"spark.sql(\"OPTIMIZE flights ZORDER BY (DayOfWeek)\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 24
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"CACHE LAZY TABLE flights"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							}
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"REFRESH TABLE flights"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"SELECT COUNT(*) AS TotalFlights\r\n",
+							"FROM flights\r\n",
+							"WHERE DayOfWeek = 1\r\n",
+							"GROUP BY Month, Origin\r\n",
+							"ORDER BY TotalFlights DESC\r\n",
+							"LIMIT 20"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"VACUUM flights "
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 6
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"DESCRIBE HISTORY flights"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 7
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Hyperspace Demonstrations')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "b525d0f5-ac0c-40a9-9046-71f40000b7e0"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"import random \r\n",
+							"\r\n",
+							"session_id = random.randint(1,1000000000)\r\n",
+							"data_path = \"/hyperspace/data-{0}\".format(session_id)\r\n",
+							"index_path = \"/hyperspace/indexes-{0}\".format(session_id)\r\n",
+							"\r\n",
+							"spark.conf.set(\"spark.hyperspace.system.path\", index_path)\r\n",
+							""
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# disable Broadcast when Spark Joins datasets and one-side is having small dataset\r\n",
+							"\r\n",
+							"spark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\", -1)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"print(spark.conf.get(\"spark.sql.autoBroadcastJoinThreshold\"))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"spark.conf.set(\"spark.hyperspace.explain.displayMode\", \"html\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql.types import *\r\n",
+							"\r\n",
+							"departments = [(10, \"Accounting\", \"New York\"), (20, \"Research\", \"Bangalore\"), (30, \"IT\", \"Hyderabad\"),\r\n",
+							"    (40, \"Operations\", \"Singapore\")]\r\n",
+							"\r\n",
+							"employees = [\r\n",
+							"    (1, \"Ramkumar\", 20),\r\n",
+							"    (2, \"Rajkumar\", 30), \r\n",
+							"    (485, \"Rajesh\", 40), \r\n",
+							"    (348, \"Smitha\", 40), \r\n",
+							"    (2922, \"Bhavana\", 20), \r\n",
+							"    (73489, \"Mary\", 20), \r\n",
+							"    (6, \"Jacob\", 10), \r\n",
+							"    (7, \"Ismail\", 10)]\r\n",
+							"\r\n",
+							"department_schema = StructType([\r\n",
+							"    StructField(\"deptId\", IntegerType(), True),\r\n",
+							"    StructField(\"deptName\", StringType(), True),\r\n",
+							"    StructField(\"location\", StringType(), True),\r\n",
+							"])\r\n",
+							"\r\n",
+							"employee_schema = StructType([\r\n",
+							"    StructField(\"empId\", IntegerType(), True),\r\n",
+							"    StructField(\"empName\", StringType(), True),\r\n",
+							"    StructField(\"deptId\", IntegerType(), True)\r\n",
+							"])\r\n",
+							"\r\n",
+							"departments_df = spark.createDataFrame(departments, department_schema)\r\n",
+							"employees_df = spark.createDataFrame(employees, employee_schema)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"employee_location = data_path + \"/employees.parquet\"\r\n",
+							"department_location = data_path + \"/departments.parquet\"\r\n",
+							"\r\n",
+							"employees_df \\\r\n",
+							"    .write \\\r\n",
+							"    .mode(\"overwrite\") \\\r\n",
+							"    .parquet(employee_location)\r\n",
+							"\r\n",
+							"departments_df \\\r\n",
+							"    .write \\\r\n",
+							"    .mode(\"overwrite\") \\\r\n",
+							"    .parquet(department_location)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"empDF = spark.read.parquet(employee_location)\r\n",
+							"deptDF = spark.read.parquet(department_location)\r\n",
+							"\r\n",
+							"empDF.show()\r\n",
+							"deptDF.show()"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from hyperspace import *\r\n",
+							"\r\n",
+							"hyperspace = Hyperspace(spark)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"emp_indexConfig = IndexConfig(\"empIndex1\", [\"deptId\"], [\"empName\"])\r\n",
+							"dept_indexConfig1 = IndexConfig(\"deptIndex1\", [\"deptId\"], [\"deptName\"])\r\n",
+							"dept_indexConfig2 = IndexConfig(\"deptIndex2\", [\"location\"], [\"deptName\"])"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.createIndex(empDF, emp_indexConfig)\r\n",
+							"hyperspace.createIndex(deptDF, dept_indexConfig1)\r\n",
+							"hyperspace.createIndex(deptDF, dept_indexConfig2)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.indexes().show()"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.deleteIndex(\"deptIndex2\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.indexes().show()"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.deleteIndex(\"deptIndex1\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.restoreIndex(\"deptIndex1\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.vacuumIndex(\"deptIndex2\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.disable(spark)\r\n",
+							"\r\n",
+							"\r\n",
+							"hyperspace.enable(spark)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.enable(spark)\r\n",
+							"\r\n",
+							"empDF1 = spark \\\r\n",
+							"    .read \\\r\n",
+							"    .format(\"parquet\") \\\r\n",
+							"    .load(employee_location)\r\n",
+							"\r\n",
+							"deptDF1 = spark \\\r\n",
+							"    .read \\\r\n",
+							"    .format(\"parquet\") \\\r\n",
+							"    .load(department_location)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"empDF1.show()\r\n",
+							"deptDF1.show()"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"eqFilter = deptDF1 \\\r\n",
+							"    .filter(\"\"\"deptId = 20\"\"\") \\\r\n",
+							"    .select(\"\"\"deptName\"\"\")\r\n",
+							"\r\n",
+							"eqFilter.show()\r\n",
+							"\r\n",
+							"hyperspace.explain(eqFilter, True, displayHTML)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"rangeFilter = deptDF1.filter(\"deptId > 20\").select(\"deptName\")\r\n",
+							"\r\n",
+							"rangeFilter.show()"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.explain(rangeFilter, True, displayHTML)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"eqJoin = empDF1 \\\r\n",
+							"    .join(deptDF1, empDF1.deptId == deptDF1.deptId) \\\r\n",
+							"    .select(empDF1.empName, deptDF1.deptName)\r\n",
+							"\r\n",
+							"eqJoin.show()\r\n",
+							"\r\n",
+							"hyperspace.explain(eqJoin, True, displayHTML)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"empDF1.createOrReplaceTempView(\"EMP\")\r\n",
+							"deptDF1.createOrReplaceTempView(\"DEPT\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"SELECT EMP.empName, DEPT.deptName\r\n",
+							"FROM EMP JOIN DEPT ON EMP.deptId = DEPT.deptId"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"query = spark.sql(\"\"\"SELECT EMP.empName, DEPT.deptName\r\n",
+							"FROM EMP JOIN DEPT ON EMP.deptId = DEPT.deptId\"\"\")\r\n",
+							"\r\n",
+							"query.show()\r\n",
+							"\r\n",
+							"hyperspace.explain(query, True, displayHTML)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"hyperspace.refreshIndex(\"deptIndex1\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Parallelization Examples')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "131846b5-7026-41c8-b7dd-f8cd98969c66"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"import numpy as np\r\n",
+							"import pandas as pd\r\n",
+							"\r\n",
+							"from sklearn.datasets import load_boston\r\n",
+							"\r\n",
+							"boston = load_boston()\r\n",
+							"\r\n",
+							"boston_pd = pd \\\r\n",
+							"    .DataFrame(data = np.c_[boston[\"data\"], boston[\"target\"]], \\\r\n",
+							"        columns = np.append(boston[\"feature_names\"], \"target\")) \\\r\n",
+							"    .sample(frac = 1)\r\n",
+							"\r\n",
+							"print(boston_pd.shape)\r\n",
+							"boston_pd.head(5)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from sklearn.linear_model import LinearRegression\r\n",
+							"from scipy.stats.stats import pearsonr\r\n",
+							"\r\n",
+							"y = boston_pd[\"target\"]\r\n",
+							"X = boston_pd.drop([\"target\"], axis = 1)\r\n",
+							"\r\n",
+							"X_train = X[:400]\r\n",
+							"X_test = X[400:]\r\n",
+							"\r\n",
+							"y_train = y[:400]\r\n",
+							"y_test = y[400:]\r\n",
+							"\r\n",
+							"lr = LinearRegression()\r\n",
+							"model = lr.fit(X_train, y_train)\r\n",
+							"\r\n",
+							"y_pred = model.predict(X_test)\r\n",
+							"r = pearsonr(y_pred, y_test)\r\n",
+							"\r\n",
+							"print(\"R-Squared : \" + str(r[0] ** 2))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"# Native spark\r\n",
+							"\r\n",
+							"from pyspark.ml.feature import VectorAssembler\r\n",
+							"\r\n",
+							"boston_sp = spark.createDataFrame(boston_pd)\r\n",
+							"\r\n",
+							"display(boston_sp.take(5))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"boston_train = spark.createDataFrame(boston_pd[:400])\r\n",
+							"boston_test = spark.createDataFrame(boston_pd[400:])\r\n",
+							"\r\n",
+							"assembler = VectorAssembler( \\\r\n",
+							"    inputCols = boston_train.schema.names[:(boston_pd.shape[1] - 1)],\r\n",
+							"    outputCol = \"features\")\r\n",
+							"\r\n",
+							"boston_train = assembler.transform(boston_train).select(\"features\", \"target\")\r\n",
+							"boston_test = assembler.transform(boston_test).select(\"features\", \"target\")\r\n",
+							"\r\n",
+							"display(boston_train.take(5))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.ml.regression import LinearRegression\r\n",
+							"\r\n",
+							"lr = LinearRegression(\r\n",
+							"    maxIter = 10, \r\n",
+							"    regParam = 0.1, \r\n",
+							"    elasticNetParam = 0.5, \r\n",
+							"    labelCol = \"target\")\r\n",
+							"\r\n",
+							"model = lr.fit(boston_train)\r\n",
+							"boston_pred = model.transform(boston_test)\r\n",
+							"\r\n",
+							"r = boston_pred.stat.corr(\"prediction\", \"target\")\r\n",
+							"\r\n",
+							"print(\"R-Squared : \" + str(r**2))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from multiprocessing.pool import ThreadPool\r\n",
+							"from sklearn.ensemble import RandomForestRegressor as RFR\r\n",
+							"\r\n",
+							"pool = ThreadPool(5)\r\n",
+							"parameters = [ 10, 20, 50 ]\r\n",
+							"\r\n",
+							"def sklearn_random_forest(trees, X_train, X_test, y_train, y_test):\r\n",
+							"    rf = RFR(n_estimators = trees)\r\n",
+							"    model = rf.fit(X_train, y_train)\r\n",
+							"    y_pred = model.predict(X_test)\r\n",
+							"    r = pearsonr(y_pred, y_test)\r\n",
+							"\r\n",
+							"    return [trees, r[0]**2]\r\n",
+							"\r\n",
+							"pool.map(lambda trees: sklearn_random_forest(trees, X_train, X_test, y_train, y_test), parameters)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.ml.regression import RandomForestRegressor\r\n",
+							"\r\n",
+							"def mllib_random_forest(trees, boston_train, boston_test):\r\n",
+							"    rf = RandomForestRegressor(numTrees = trees, labelCol = \"target\")\r\n",
+							"    model = rf.fit(boston_train)\r\n",
+							"    boston_pred = model.transform(boston_test)\r\n",
+							"    r = boston_pred.stat.corr(\"prediction\", \"target\")\r\n",
+							"    return [trees, r**2]\r\n",
+							"\r\n",
+							"pool.map(lambda trees: mllib_random_forest(trees, boston_train, boston_test), parameters)"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# Pandas UDFs\r\n",
+							"\r\n",
+							"from pyspark.sql.functions import pandas_udf, PandasUDFType\r\n",
+							"from pyspark.sql.types import *\r\n",
+							"\r\n",
+							"boston_sp.createOrReplaceTempView(\"boston\")\r\n",
+							"\r\n",
+							"full_df = spark.sql(\"\"\"\r\n",
+							"    SELECT * FROM (\r\n",
+							"        SELECT *, CASE WHEN rand() < 0.8 THEN 1 ELSE 0 END AS training\r\n",
+							"        FROM boston\r\n",
+							"    ) b\r\n",
+							"    CROSS JOIN (\r\n",
+							"        SELECT 11 AS trees\r\n",
+							"        UNION ALL\r\n",
+							"        SELECT 20 AS trees\r\n",
+							"        UNION ALL\r\n",
+							"        SELECT 50 AS trees\r\n",
+							"    )\r\n",
+							"\"\"\")\r\n",
+							"\r\n",
+							"schema = StructType([\r\n",
+							"    StructField(\"trees\", LongType(), True),\r\n",
+							"    StructField(\"r_squared\", DoubleType(), True)\r\n",
+							"])\r\n",
+							"\r\n",
+							"@pandas_udf(schema, PandasUDFType.GROUPED_MAP)\r\n",
+							"def train_RF(boston_pd):\r\n",
+							"    trees = boston_pd['trees'].unique()[0]\r\n",
+							"    boston_train = boston_pd[boston_pd[\"training\"] == 1]\r\n",
+							"    boston_test = boston_pd[boston_pd[\"training\"] == 0]\r\n",
+							"\r\n",
+							"    y_train = boston_train[\"target\"]\r\n",
+							"    X_train = boston_train.drop([\"target\"], axis = 1)\r\n",
+							"\r\n",
+							"    y_test = boston_test[\"target\"]\r\n",
+							"    X_test = boston_test.drop([\"target\"], axis = 1)\r\n",
+							"\r\n",
+							"    rf = RFR(n_estimators=trees)\r\n",
+							"\r\n",
+							"    model = rf.fit(X_train, y_train)\r\n",
+							"    y_pred = model.predict(X_test)\r\n",
+							"    r = pearsonr(y_pred, y_test)\r\n",
+							"\r\n",
+							"    return pd.DataFrame({\r\n",
+							"        'trees': trees,\r\n",
+							"        'r_squared': (r[0]**2)\r\n",
+							"    }, index = [0])\r\n",
+							""
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 29
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"results = full_df.groupby('trees').apply(train_RF)\r\n",
+							"\r\n",
+							"print(results.take(3))"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 30
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SparkPool001')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 30
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.1",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		}
+	]
+}
