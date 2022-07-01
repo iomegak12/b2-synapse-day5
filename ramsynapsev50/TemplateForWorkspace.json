@@ -1785,6 +1785,35 @@
 				"type": "KqlQuery"
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE FactSales\n(\n    SaleID INT,\n    SalesDate INT,\n    CustomerID INT,\n    EmployeeID INT,\n    StoreID INT,\n    ProductID INT,\n    NoOfUnits INT,\n    SaleAmount INT,\n    SalesReasonID INT,\n    ProductCost INT\n);\nGO\n\nCOPY INTO FactSales\nFROM 'https://ramdlsv50.blob.core.windows.net/ramdlsfsv50/simplemodel/FactSales.csv'\nWITH (\n    FILE_TYPE = 'CSV',\n    CREDENTIAL = (\n        IDENTITY = 'Shared Access Signature',\n        SECRET = '?sv=2021-06-08&st=2022-06-30T09%3A21%3A00Z&se=2022-07-02T09%3A21%3A44Z&sr=b&sp=r&sig=G1oARhWyUvAEJ3y%2FY5YryqOIdss%2B7ekZUPmLxUP7pNk%3D'\n    ),\n    FIELDQUOTE = '\"',\n    FIELDTERMINATOR = ',',\n    ROWTERMINATOR = '0x0A',\n    ENCODING = 'UTF8',\n    FIRSTROW = 2\n);\nGO\n\nSELECT COUNT(*) FROM FactSales;\n\nSELECT COUNT(*) FROM FactSales\n    OPTION (LABEL = 'Result Set Caching Test')\n\nSELECT request_id, status, submit_time, total_elapsed_time, [label], command, result_cache_hit\nFROM sys.dm_pdw_exec_requests\nWHERE [label] = 'Result Set Caching Test'\nORDER BY submit_time DESC\n\nALTER DATABASE SQLPool001\nSET RESULT_SET_CACHING ON;\n\nSELECT name, is_result_set_caching_on \nFROM sys.databases;\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SQLPool001",
+						"poolName": "SQLPool001"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLPool001')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
 		}
 	]
 }
