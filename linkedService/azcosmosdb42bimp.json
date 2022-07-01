@@ -1,0 +1,23 @@
+{
+	"name": "azcosmosdb42bimp",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "CosmosDb",
+		"typeProperties": {
+			"connectionString": "AccountEndpoint=https://azcosmosdb42bimp.documents.azure.com:443/;Database=OperationalDB",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "azkeyvault42bimp",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "azcosmosdb42bimp-Key"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

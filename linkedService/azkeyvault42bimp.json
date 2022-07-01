@@ -1,0 +1,11 @@
+{
+	"name": "azkeyvault42bimp",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://azkeyvault42bimp.vault.azure.net/"
+		}
+	}
+}

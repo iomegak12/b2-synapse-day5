@@ -1,0 +1,28 @@
+{
+	"name": "azanomalydetector42bimp",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "CognitiveService",
+		"typeProperties": {
+			"subscriptionId": "ca663af4-1306-4dfe-8a9d-19990935c081",
+			"resourceGroup": "e2eresourcegroup",
+			"csName": "azanomalydetector42bimp",
+			"csKind": "AnomalyDetector",
+			"csLocation": "eastus",
+			"endPoint": "https://azanomalydetector42bimp.cognitiveservices.azure.com/",
+			"csKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "azkeyvault42bimp",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "azanomalydetector42bimp-Key"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

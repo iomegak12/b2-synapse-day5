@@ -1,0 +1,7 @@
+{
+	"name": "aztextanalytics42bimp-account",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/e2eresourcegroup/providers/Microsoft.CognitiveServices/accounts/aztextanalytics42bimp",
+		"groupId": "account"
+	}
+}

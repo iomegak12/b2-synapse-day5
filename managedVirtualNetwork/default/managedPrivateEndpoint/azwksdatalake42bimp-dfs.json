@@ -1,0 +1,10 @@
+{
+	"name": "azwksdatalake42bimp-dfs",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/e2eresourcegroup/providers/Microsoft.Storage/storageAccounts/azwksdatalake42bimp",
+		"groupId": "dfs",
+		"fqdns": [
+			"azwksdatalake42bimp.dfs.core.windows.net"
+		]
+	}
+}

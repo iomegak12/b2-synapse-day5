@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--azsynapsewks42bimp",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/e2eresourcegroup/providers/Microsoft.Synapse/workspaces/azsynapsewks42bimp",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"azsynapsewks42bimp-ondemand.3081dd01-20d9-4d2d-83a0-33035251b010.sql.azuresynapse.net"
+		]
+	}
+}

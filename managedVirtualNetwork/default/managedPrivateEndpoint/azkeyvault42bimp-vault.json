@@ -1,0 +1,10 @@
+{
+	"name": "azkeyvault42bimp-vault",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/e2eresourcegroup/providers/Microsoft.KeyVault/vaults/azkeyvault42bimp",
+		"groupId": "vault",
+		"fqdns": [
+			"azkeyvault42bimp.vault.azure.net"
+		]
+	}
+}

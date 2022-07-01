@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-kusto-3081dd0120-v2",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/e2eresourcegroup/providers/Microsoft.Synapse/workspaces/azsynapsewks42bimp",
+		"groupId": "Kusto",
+		"fqdns": [
+			"ramadxpoolv50.azsynapsewks42bimp.kusto.azuresynapse.net"
+		]
+	}
+}

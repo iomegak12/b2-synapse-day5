@@ -1,0 +1,28 @@
+{
+	"name": "aztextanalytics42bimp",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "CognitiveService",
+		"typeProperties": {
+			"subscriptionId": "ca663af4-1306-4dfe-8a9d-19990935c081",
+			"resourceGroup": "e2eresourcegroup",
+			"csName": "aztextanalytics42bimp",
+			"csKind": "TextAnalytics",
+			"csLocation": "eastus",
+			"endPoint": "https://aztextanalytics42bimp.cognitiveservices.azure.com/",
+			"csKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "azkeyvault42bimp",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "aztextanalytics42bimp-Key"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
