@@ -1,0 +1,542 @@
+{
+	"name": "Delta Lake Optimization - 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "SparkPool001",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "e91aff85-9529-4013-90f7-474b12c892a0"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"14e69524-aea2-48c8-a096-7b91af95e8ff": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "6",
+										"1": "ATL",
+										"2": "6046"
+									},
+									{
+										"0": "3",
+										"1": "ATL",
+										"2": "6019"
+									},
+									{
+										"0": "9",
+										"1": "ATL",
+										"2": "5722"
+									},
+									{
+										"0": "6",
+										"1": "ORD",
+										"2": "5241"
+									},
+									{
+										"0": "3",
+										"1": "ORD",
+										"2": "5072"
+									},
+									{
+										"0": "9",
+										"1": "ORD",
+										"2": "4931"
+									},
+									{
+										"0": "7",
+										"1": "ATL",
+										"2": "4894"
+									},
+									{
+										"0": "8",
+										"1": "ATL",
+										"2": "4821"
+									},
+									{
+										"0": "4",
+										"1": "ATL",
+										"2": "4798"
+									},
+									{
+										"0": "5",
+										"1": "ATL",
+										"2": "4656"
+									},
+									{
+										"0": "2",
+										"1": "ATL",
+										"2": "4601"
+									},
+									{
+										"0": "1",
+										"1": "ATL",
+										"2": "4540"
+									},
+									{
+										"0": "7",
+										"1": "ORD",
+										"2": "4249"
+									},
+									{
+										"0": "8",
+										"1": "ORD",
+										"2": "4171"
+									},
+									{
+										"0": "4",
+										"1": "ORD",
+										"2": "4140"
+									},
+									{
+										"0": "5",
+										"1": "ORD",
+										"2": "4134"
+									},
+									{
+										"0": "6",
+										"1": "DFW",
+										"2": "4129"
+									},
+									{
+										"0": "2",
+										"1": "ORD",
+										"2": "3999"
+									},
+									{
+										"0": "1",
+										"1": "ORD",
+										"2": "3992"
+									},
+									{
+										"0": "9",
+										"1": "DFW",
+										"2": "3953"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "Month",
+										"type": "int"
+									},
+									{
+										"key": "1",
+										"name": "Origin",
+										"type": "string"
+									},
+									{
+										"key": "2",
+										"name": "TotalFlights",
+										"type": "bigint"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"1"
+									],
+									"seriesFieldKeys": [
+										"0"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+				"name": "SparkPool001",
+				"type": "Spark",
+				"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"dataPath = \"/data.csv\"\r\n",
+					"\r\n",
+					"flights = spark \\\r\n",
+					"    .read \\\r\n",
+					"    .format(\"csv\") \\\r\n",
+					"    .option(\"header\", \"true\") \\\r\n",
+					"    .option(\"inferSchema\", \"true\") \\\r\n",
+					"    .load(dataPath)\r\n",
+					"\r\n",
+					"flights.show(10)"
+				],
+				"attachments": null,
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"partitionedDlsPath = \"/partitioned-flights\"\r\n",
+					"\r\n",
+					"flights \\\r\n",
+					"    .write \\\r\n",
+					"    .format(\"parquet\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .partitionBy(\"Origin\") \\\r\n",
+					"    .save(partitionedDlsPath)"
+				],
+				"attachments": null,
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"flights_parquet = spark \\\r\n",
+					"    .read \\\r\n",
+					"    .format(\"parquet\") \\\r\n",
+					"    .load(partitionedDlsPath)"
+				],
+				"attachments": null,
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"filtered_flights = flights_parquet \\\r\n",
+					"    .filter(\"DayOfWeek = 1\") \\\r\n",
+					"    .groupBy(\"Month\", \"Origin\") \\\r\n",
+					"    .agg (\r\n",
+					"        count(\"*\").alias(\"TotalFlights\")) \\\r\n",
+					"    .orderBy(\"TotalFlights\", ascending = False) \\\r\n",
+					"    .limit(20)\r\n",
+					"\r\n",
+					"display(filtered_flights)"
+				],
+				"attachments": null,
+				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"deltaDlsPath = \"/delta-partitioned-flights\"\r\n",
+					"\r\n",
+					"flights \\\r\n",
+					"    .write \\\r\n",
+					"    .format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .partitionBy(\"Origin\") \\\r\n",
+					"    .save(deltaDlsPath)"
+				],
+				"attachments": null,
+				"execution_count": 19
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"DROP TABLE IF EXISTS flights;\r\n",
+					"\r\n",
+					"CREATE TABLE flights\r\n",
+					"USING DELTA\r\n",
+					"LOCATION \"/delta-partitioned-flights\""
+				],
+				"attachments": null,
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"SELECT COUNT(*) AS TotalFlights\r\n",
+					"FROM flights\r\n",
+					"WHERE DayOfWeek = 1\r\n",
+					"GROUP BY Month, Origin\r\n",
+					"ORDER BY TotalFlights DESC\r\n",
+					"LIMIT 20"
+				],
+				"attachments": null,
+				"execution_count": 21
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"OPTIMIZE flights ZORDER BY (DayOfWeek)\")"
+				],
+				"attachments": null,
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"CACHE LAZY TABLE flights"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					}
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"REFRESH TABLE flights"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"SELECT COUNT(*) AS TotalFlights\r\n",
+					"FROM flights\r\n",
+					"WHERE DayOfWeek = 1\r\n",
+					"GROUP BY Month, Origin\r\n",
+					"ORDER BY TotalFlights DESC\r\n",
+					"LIMIT 20"
+				],
+				"attachments": null,
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"VACUUM flights "
+				],
+				"attachments": null,
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"DESCRIBE HISTORY flights"
+				],
+				"attachments": null,
+				"execution_count": 7
+			}
+		]
+	}
+}
