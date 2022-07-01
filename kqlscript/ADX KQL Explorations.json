@@ -1,0 +1,16 @@
+{
+	"name": "ADX KQL Explorations",
+	"properties": {
+		"content": {
+			"query": ".create table StormEvents ( \n    StartTime:\tdatetime,\n    EndTime:\t\tdatetime,\n    EpisodeId:\tint,\n    EventId:\t\tint,\n    State:\t\tstring,\n    EventType:\tstring,\n    InjuriesDirect:\tint,\n    InjuriesIndirect: int,\n    DeathsDirect:\tint,\n    DeathsIndirect:\tint,\n    DamageProperty:\tint,\n    DamageCrops:\t\tint,\n    Source:\t\t\tstring,\n    BeginLocation:\tstring,\n    EndLocation:\tstring,\n    BeginLat:\t\treal,\n    BeginLon:\t\treal,\n    EndLat:\t\t\treal,\n    EndLon:\t\t\treal,\n    EpisodeNarrative:\tstring,\n    EventNarrative:\t\tstring,\n    StormSummary: dynamic\n)\n\n.show tables \n\n.show table StormEvents\n\n.ingest into table StormEvents\n h'https://ramdlsv50.blob.core.windows.net/ramdlsfsv50/StormEvents.csv?sv=2021-06-08&st=2022-06-30T08%3A52%3A00Z&se=2022-07-02T08%3A52%3A06Z&sr=b&sp=r&sig=xI6S38TcqAEAbVSFKbdWp5KSI%2BPZUO4FElM%2FHucCIsY%3D'\n\n .show operations \n | sort  by StartedOn\n\n StormEvents\n | count \n\n ",
+			"metadata": {
+				"language": "kql"
+			},
+			"currentConnection": {
+				"poolName": "ramadxpool001",
+				"databaseName": "trainingdb"
+			}
+		},
+		"type": "KqlQuery"
+	}
+}
