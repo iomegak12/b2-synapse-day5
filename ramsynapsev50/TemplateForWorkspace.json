@@ -1768,15 +1768,21 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/KQL script 1')]",
+			"name": "[concat(parameters('workspaceName'), '/ADX Explorations - 2')]",
 			"type": "Microsoft.Synapse/workspaces/kqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
+					"query": "StormEvents\n| where notnull(State)\n| summarize StormEventCount = toint(count()) by State\n| project State, StormEventCount\n| sort by StormEventCount desc nulls first \n| take 100\n\nStormEvents\n| where StartTime > datetime(2007-02-01) and StartTime < datetime(2007-03-01) and \n    EventType == 'Flood' and State == 'CALIFORNIA'\n| project StartTime, EndTime, State, EventType, EventNarrative\n\n.create function with (folder = 'Trainings')\n    getStateSpecificEvents(myState: string)\n    {\n        StormEvents \n        | where State =~ myState\n    }\n\ngetStateSpecificEvents('Texas')\n| summarize EventCount = count()\n\nStormEvents\n| extend Duration = EndTime - StartTime, Damage = DamageCrops + DamageProperty\n| where Duration > timespan(0) and Damage > 0\n| project EventId, EventType, Duration, Damage\n| summarize TotalDamage = sum(Damage), AverageDuration = avg(Duration)\n| sort by TotalDamage desc \n\nStormEvents\n| project StormSummary\n| take 5\n\nStormEvents\n| project EventId, StormSummary.TotalDamages, StormSummary.Details.Description,\n    StormSummary.Details.Location\n| take 10 \n\nStormEvents\n| where EventType matches regex \"(.*)(Storm | Rain)\"\n| distinct  EventType\n| project EventType\n\nStormEvents\n| summarize EventCount = count(), Mid = avg(BeginLat) by State\n| sort by Mid\n| where EventCount  >= 1800\n| project State, EventCount\n| render columnchart \n\nStormEvents\n| summarize EventCount = count() by bin(StartTime, 1d)\n| where isnotnull(StartTime)\n| render timechart\n\n\nStormEvents \n| where StartTime > datetime(2007-01-01) and StartTime < datetime(2007-06-01)\n| summarize count() by bin(StartTime, 10h)\n| render timechart \n",
 					"metadata": {
 						"language": "kql"
+					},
+					"currentConnection": {
+						"poolName": "ramadxpool001",
+						"databaseName": "trainingdb"
 					}
-				}
+				},
+				"type": "KqlQuery"
 			},
 			"dependsOn": []
 		}
