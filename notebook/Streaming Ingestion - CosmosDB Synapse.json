@@ -1,0 +1,141 @@
+{
+	"name": "Streaming Ingestion - CosmosDB Synapse",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "SparkPool001",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "ce32a8e4-f844-4d4a-938e-f8b1ca9c8247"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+				"name": "SparkPool001",
+				"type": "Spark",
+				"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"dfStream = (spark \\\r\n",
+					"    .readStream \\\r\n",
+					"    .format(\"rate\") \\\r\n",
+					"    .option(\"rowsPerSecond\", 10) \\\r\n",
+					"    .load())"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import pyspark.sql.functions as F\r\n",
+					"from pyspark.sql.types import StringType\r\n",
+					"import uuid\r\n",
+					"\r\n",
+					"numberOfDevices = 10\r\n",
+					"generate_uuid = F.udf(lambda: str(uuid.uuid4()), StringType())\r\n",
+					"\r\n",
+					"dfIoTSignals = (dfStream\r\n",
+					"                    .withColumn(\"id\", generate_uuid())\r\n",
+					"                    .withColumn(\"deviceId\", F.concat(F.lit(\"dev-\"), F.expr(\"mod(value, %d)\" % numberOfDevices)))\r\n",
+					"                    .withColumn(\"dateTime\", dfStream[\"timestamp\"].cast(StringType()))\r\n",
+					"                    .withColumn(\"unit\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'Revolutions per Minute' ELSE 'MegaWatts' END\"))\r\n",
+					"                    .withColumn(\"unitSymbol\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'RPM' ELSE 'MW' END\"))\r\n",
+					"                    .withColumn(\"measureType\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'Rotation Speed' ELSE 'Output' END\"))\r\n",
+					"                    .withColumn(\"measureValue\", F.expr(\"CASE WHEN rand() > 0.95 THEN value * 10 WHEN rand() < 0.05 THEN value div 10 ELSE value END\"))\r\n",
+					"                    .drop(\"timestamp\", \"value\")\r\n",
+					"                )"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"streamQuery = dfIoTSignals \\\r\n",
+					"    .writeStream \\\r\n",
+					"    .format(\"cosmos.oltp\") \\\r\n",
+					"    .outputMode(\"append\") \\\r\n",
+					"    .option(\"spark.synapse.linkedService\", \"CosmosDb1\") \\\r\n",
+					"    .option(\"spark.cosmos.container\", \"IoTSignals\") \\\r\n",
+					"    .option(\"checkpointLocation\", \"/checkpoints\") \\\r\n",
+					"    .start()"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"streamQuery.status"
+				],
+				"execution_count": 4
+			}
+		]
+	}
+}
