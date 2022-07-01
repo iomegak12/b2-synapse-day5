@@ -8,6 +8,9 @@
 		"ramsynapsev50-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
+		"CosmosDb1_connectionString": {
+			"value": ""
+		},
 		"TrainingDLSGen2_properties_typeProperties_url": {
 			"value": "https://ramperfdlsv10.dfs.core.windows.net/"
 		},

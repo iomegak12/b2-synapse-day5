@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ramsynapsev50-WorkspaceDefaultSqlServer'"
 		},
+		"CosmosDb1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CosmosDb1'"
+		},
 		"TrainingDLSGen2_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://ramperfdlsv10.dfs.core.windows.net/"
@@ -1812,6 +1816,433 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Streaming Ingestion - CosmosDB Synapse')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "84384315-b6ff-40fb-820d-c0d9979894d3"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"dfStream = (spark \\\r\n",
+							"    .readStream \\\r\n",
+							"    .format(\"rate\") \\\r\n",
+							"    .option(\"rowsPerSecond\", 10) \\\r\n",
+							"    .load())"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"import pyspark.sql.functions as F\r\n",
+							"from pyspark.sql.types import StringType\r\n",
+							"import uuid\r\n",
+							"\r\n",
+							"numberOfDevices = 10\r\n",
+							"generate_uuid = F.udf(lambda: str(uuid.uuid4()), StringType())\r\n",
+							"\r\n",
+							"dfIoTSignals = (dfStream\r\n",
+							"                    .withColumn(\"id\", generate_uuid())\r\n",
+							"                    .withColumn(\"deviceId\", F.concat(F.lit(\"dev-\"), F.expr(\"mod(value, %d)\" % numberOfDevices)))\r\n",
+							"                    .withColumn(\"dateTime\", dfStream[\"timestamp\"].cast(StringType()))\r\n",
+							"                    .withColumn(\"unit\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'Revolutions per Minute' ELSE 'MegaWatts' END\"))\r\n",
+							"                    .withColumn(\"unitSymbol\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'RPM' ELSE 'MW' END\"))\r\n",
+							"                    .withColumn(\"measureType\", F.expr(\"CASE WHEN rand() < 0.5 THEN 'Rotation Speed' ELSE 'Output' END\"))\r\n",
+							"                    .withColumn(\"measureValue\", F.expr(\"CASE WHEN rand() > 0.95 THEN value * 10 WHEN rand() < 0.05 THEN value div 10 ELSE value END\"))\r\n",
+							"                    .drop(\"timestamp\", \"value\")\r\n",
+							"                )"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"streamQuery = dfIoTSignals \\\r\n",
+							"    .writeStream \\\r\n",
+							"    .format(\"cosmos.oltp\") \\\r\n",
+							"    .outputMode(\"append\") \\\r\n",
+							"    .option(\"spark.synapse.linkedService\", \"CosmosDb1\") \\\r\n",
+							"    .option(\"spark.cosmos.container\", \"IoTSignals\") \\\r\n",
+							"    .option(\"checkpointLocation\", \"/checkpoints\") \\\r\n",
+							"    .start()"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"streamQuery.status"
+						],
+						"outputs": [],
+						"execution_count": 4
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CosmosDb1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('CosmosDb1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "e04df8de-b1e8-4a80-ba30-9b486808d113"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ca663af4-1306-4dfe-8a9d-19990935c081/resourceGroups/day5resourcegroup/providers/Microsoft.Synapse/workspaces/ramsynapsev50/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://ramsynapsev50.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"deviceInfoPath = \"/IoTData/IoTDeviceInfo.csv\"\r\n",
+							"\r\n",
+							"dfDeviceInfo = (spark \\\r\n",
+							"    .read \\\r\n",
+							"    .csv(deviceInfoPath, inferSchema=True, header=True))\r\n",
+							"\r\n",
+							"df = dfDeviceInfo. \\\r\n",
+							"    withColumn(\"id\", generate_uuid())\r\n",
+							"\r\n",
+							"df \\\r\n",
+							"    .write \\\r\n",
+							"    .format(\"cosmos.oltp\") \\\r\n",
+							"    .option(\"spark.synapse.linkedService\", \"CosmosDb1\") \\\r\n",
+							"    .option(\"spark.cosmos.container\", \"IoTDeviceInfo\") \\\r\n",
+							"    .mode(\"append\") \\\r\n",
+							"    .save()"
+						],
+						"outputs": [],
+						"execution_count": 10
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"create database CosmosDBIoTDemo"
+						],
+						"outputs": [],
+						"execution_count": 11
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"drop table CosmosDBIoTDemo.IoTSignals;\r\n",
+							"\r\n",
+							"create table if not exists CosmosDBIoTDemo.IoTSignals\r\n",
+							"using cosmos.olap\r\n",
+							"options(\r\n",
+							"    spark.synapse.linkedService 'CosmosDb1',\r\n",
+							"    spark.cosmos.container 'IoTSignals'\r\n",
+							")\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 17
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"drop table CosmosDBIoTDemo.IoTDeviceInfo;\r\n",
+							"\r\n",
+							"create table if not exists CosmosDBIoTDemo.IoTDeviceInfo\r\n",
+							"using cosmos.olap\r\n",
+							"options(\r\n",
+							"    spark.synapse.linkedService 'CosmosDb1',\r\n",
+							"    spark.cosmos.container 'IoTDeviceInfo'\r\n",
+							")"
+						],
+						"outputs": [],
+						"execution_count": 16
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"SELECT a.deviceid, b.devicetype, cast(b.location as string) as location,\r\n",
+							"    cast(b.longitude as float) as longitude,\r\n",
+							"    cast(b.latitude as float) as latitude,\r\n",
+							"    a.measuretype, a.unitSymbol,\r\n",
+							"    cast(sum(measureValue) as float) as measureValueSum,\r\n",
+							"    count(*) as count\r\n",
+							"FROM CosmosDBIoTDemo.IoTSignals a\r\n",
+							"JOIN CosmosDBIoTDemo.IoTDeviceInfo b ON a.deviceid = b.deviceid\r\n",
+							"WHERE a.unitSymbol = 'RPM'\r\n",
+							"GROUP BY a.deviceid, b.devicetype, b.location, b.latitude, b.longitude, a.measuretype, a.unitSymbol"
+						],
+						"outputs": [],
+						"execution_count": 18
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"import plotly.express as px\r\n",
+							"from plotly.offline import plot\r\n",
+							"\r\n",
+							"df_RM_Details = spark.sql(\"\"\"\r\n",
+							"SELECT a.deviceid, b.devicetype, cast(b.location as string) as location,\r\n",
+							"    cast(b.longitude as float) as longitude,\r\n",
+							"    cast(b.latitude as float) as latitude,\r\n",
+							"    a.measuretype, a.unitSymbol,\r\n",
+							"    cast(sum(measureValue) as float) as measureValueSum,\r\n",
+							"    count(*) as count\r\n",
+							"FROM CosmosDBIoTDemo.IoTSignals a\r\n",
+							"JOIN CosmosDBIoTDemo.IoTDeviceInfo b ON a.deviceid = b.deviceid\r\n",
+							"WHERE a.unitSymbol = 'RPM'\r\n",
+							"GROUP BY a.deviceid, b.devicetype, b.location, b.latitude, b.longitude, a.measuretype, a.unitSymbol\r\n",
+							"\"\"\")\r\n",
+							"\r\n",
+							"df_RPM_Details_pd = df_RM_Details.toPandas()\r\n",
+							"\r\n",
+							"fig = px.scatter_mapbox(df_RPM_Details_pd,\r\n",
+							"    lat = 'latitude',\r\n",
+							"    lon='longitude',\r\n",
+							"    size = 'measureValueSum',\r\n",
+							"    color = 'measureValueSum',\r\n",
+							"    hover_name= 'location',\r\n",
+							"    hover_data = ['measureValueSum', 'location'],\r\n",
+							"    size_max=30,\r\n",
+							"    color_continuous_scale=px.colors.carto.Temps,\r\n",
+							"    zoom = 3,\r\n",
+							"    height = 600,\r\n",
+							"    width = 900)\r\n",
+							"\r\n",
+							"fig.update_layout(mapbox_style = 'open-street-map')\r\n",
+							"fig.update_layout(margin = {'r': 0, 't': 0, 'l': 0, 'b': 0})\r\n",
+							"\r\n",
+							"p = plot(fig, output_type = 'div')\r\n",
+							"\r\n",
+							"displayHTML(p)"
+						],
+						"outputs": [],
+						"execution_count": 21
+					}
+				]
 			},
 			"dependsOn": []
 		}
